@@ -16,6 +16,7 @@ import {
   messageComponents
 } from "./message-sending";
 import { symmetricDecrypt } from "./crypto";
+import { getUsersByCell, createUser } from "../../api/user";
 
 const MAX_SEND_ATTEMPTS = 5;
 const MESSAGE_VALIDITY_PADDING_SECONDS = 30;
@@ -345,6 +346,32 @@ async function handleDeliveryReport(report) {
   return insertResult;
 }
 
+async function handleOnboarding(contactNumber, incomingMessage) {
+  const onboardingText =
+    'Hi there! Thanks for sending a text to CheckUpOn.Me! If you would like to be texted by one of our volunteers, please reply to this message with the word "YES".';
+
+  const user = await createUser({
+    first_name: "",
+    last_name: "",
+    cell: contactNumber,
+    email: "",
+    is_superadmin: false
+  });
+  const replyMessage = await createMessage({
+    user_id: user.id,
+    campaign_contact_id: incomingMessage.campaignContactId,
+    text: onboardingText,
+    contact_number: contactNumber,
+    assignment_id: incomingMessage.assignmentId
+  });
+
+  const organizationId = incomingMessage.organizationId;
+
+  sendMessage(replyMessage, organizationId)
+    .then()
+    .catch();
+}
+
 async function handleIncomingMessage(message) {
   if (
     !message.hasOwnProperty("From") ||
@@ -358,6 +385,12 @@ async function handleIncomingMessage(message) {
   const { From, To, MessageSid } = message;
   const contactNumber = getFormattedPhoneNumber(From);
   const userNumber = To ? getFormattedPhoneNumber(To) : "";
+
+  if (!getUsersByCell(contactNumber)) {
+    handleOnboarding(contactNumber, message)
+      .then()
+      .catch();
+  }
 
   let pendingMessagePart = {
     service: "twilio",
