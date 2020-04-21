@@ -27,6 +27,14 @@ const headerValidator = () => {
   if (!!SKIP_TWILIO_VALIDATION) return (req, res, next) => next();
 
   return async (req, res, next) => {
+    /*    handleIncomingMessage({
+          From: "6467047784",
+          To:"6467047711",
+          Body: "hello world",
+          MessageSid: 123,
+          MessageStatus: true
+        })
+    */
     const { MessagingServiceSid } = req.body;
     const { authToken } = await getTwilioCredentials(MessagingServiceSid);
 
@@ -274,9 +282,9 @@ async function sendMessage(message, organizationId, trx = r.knex) {
           .then(() =>
             reject(
               err ||
-                (response
-                  ? new Error(JSON.stringify(response))
-                  : new Error("Encountered unknown error"))
+              (response
+                ? new Error(JSON.stringify(response))
+                : new Error("Encountered unknown error"))
             )
           );
       } else {
@@ -337,7 +345,7 @@ async function handleDeliveryReport(report) {
       if (rowCount !== 1) {
         logger.warn(
           `Received message report '${MessageStatus}' for Message SID ` +
-            `'${service_id}' that matched ${rowCount} messages. Expected only 1 match.`
+          `'${service_id}' that matched ${rowCount} messages. Expected only 1 match.`
         );
       }
     })
@@ -346,30 +354,53 @@ async function handleDeliveryReport(report) {
   return insertResult;
 }
 
-async function handleOnboarding(contactNumber, incomingMessage) {
-  const onboardingText =
-    'Hi there! Thanks for sending a text to CheckUpOn.Me! If you would like to be texted by one of our volunteers, please reply to this message with the word "YES".';
 
-  const user = await createUser({
-    first_name: "",
-    last_name: "",
-    cell: contactNumber,
-    email: "",
-    is_superadmin: false
-  });
-  const replyMessage = await createMessage({
-    user_id: user.id,
-    campaign_contact_id: incomingMessage.campaignContactId,
-    text: onboardingText,
-    contact_number: contactNumber,
-    assignment_id: incomingMessage.assignmentId
-  });
 
-  const organizationId = incomingMessage.organizationId;
+async function maybeOnboardNewContact(contactNumber, userNumber) {
+  const campaignId = process.env.CAMPAIGN_ID;
+  const isExistingUser = r
+    .knex("campaign_contact")
+    .select('id')
+    .where({
+      cell: contactNumber,
+      campaign_id: campaignId
+    })
+    .limit(1)
 
-  sendMessage(replyMessage, organizationId)
-    .then()
-    .catch();
+  if (! isExistingUser || (isExistingUser.length && isExistingUser.length<1)) {
+    const onboardingCampaignId = process.env.ONBOARDING_CAMPAIGN || campaignID + 1;
+    const contact = {
+      first_name: "",
+      last_name: "",
+      cell: contactNumber,
+      campaign_id: onboardingCampaignId
+    };
+    let contactId = await r
+      .knex("campaign_contact")
+      .insert(contact)
+      .return('id');
+
+    if (contactId) {
+      const onboardingText =
+        'Hi there! Thanks for sending a text to CheckUpOn.Me! If you would like to be texted by one of our volunteers, please reply to this message with the word "YES".';
+
+      let organizationId = await r
+        .knex("campaign")
+        .select("organization_id")
+        .where({campaign_id: onboardingCampaignId})
+        .first();
+
+      const replyMessage = {
+        campaign_contact_id: contactId,
+        user_number: userNumber,
+        text: onboardingText,
+        contact_number: contactNumber,
+      };
+      sendMessage(replyMessage, organizationId)
+        .then(data=>console.info(`Onboarding sent to ${contactNumber}`))
+        .catch(err=>console.error(`Unable to onboard invite ${contactNumber}: ${err}`));
+    }
+  }
 }
 
 async function handleIncomingMessage(message) {
@@ -386,11 +417,7 @@ async function handleIncomingMessage(message) {
   const contactNumber = getFormattedPhoneNumber(From);
   const userNumber = To ? getFormattedPhoneNumber(To) : "";
 
-  if (!getUsersByCell(contactNumber)) {
-    handleOnboarding(contactNumber, message)
-      .then()
-      .catch();
-  }
+  await maybeOnboardNewContact(contactNumber, userNumber);
 
   let pendingMessagePart = {
     service: "twilio",
