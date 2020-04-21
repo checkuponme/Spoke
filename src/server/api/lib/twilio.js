@@ -16,7 +16,6 @@ import {
   messageComponents
 } from "./message-sending";
 import { symmetricDecrypt } from "./crypto";
-import { getUsersByCell, createUser } from "../../api/user";
 
 const MAX_SEND_ATTEMPTS = 5;
 const MESSAGE_VALIDITY_PADDING_SECONDS = 30;
@@ -282,9 +281,9 @@ async function sendMessage(message, organizationId, trx = r.knex) {
           .then(() =>
             reject(
               err ||
-              (response
-                ? new Error(JSON.stringify(response))
-                : new Error("Encountered unknown error"))
+                (response
+                  ? new Error(JSON.stringify(response))
+                  : new Error("Encountered unknown error"))
             )
           );
       } else {
@@ -345,7 +344,7 @@ async function handleDeliveryReport(report) {
       if (rowCount !== 1) {
         logger.warn(
           `Received message report '${MessageStatus}' for Message SID ` +
-          `'${service_id}' that matched ${rowCount} messages. Expected only 1 match.`
+            `'${service_id}' that matched ${rowCount} messages. Expected only 1 match.`
         );
       }
     })
