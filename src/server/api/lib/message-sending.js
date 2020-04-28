@@ -121,7 +121,11 @@ export const getContactMessagingService = async (
   );
 
   // Return an existing match if there is one - this is the vast majority of cases
-  if (existingMessagingService) {
+
+  if (
+    existingMessagingService &&
+    existingMessagingService.messaging_service_sid
+  ) {
     return existingMessagingService;
   }
 

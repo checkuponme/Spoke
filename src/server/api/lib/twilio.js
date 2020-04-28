@@ -16,7 +16,7 @@ import {
   messageComponents
 } from "./message-sending";
 import { symmetricDecrypt } from "./crypto";
-import { maybeOnboardNewContact } from './onboardIncoming';
+import { maybeOnboardNewContact } from "./twilio-incoming";
 
 const MAX_SEND_ATTEMPTS = 5;
 const MESSAGE_VALIDITY_PADDING_SECONDS = 30;
@@ -347,12 +347,15 @@ async function handleDeliveryReport(report) {
 }
 
 async function handleIncomingMessage(message) {
+  let incomingMessage = true;
+
   if (
     !message.hasOwnProperty("From") ||
     !message.hasOwnProperty("To") ||
     !message.hasOwnProperty("Body") ||
     !message.hasOwnProperty("MessageSid")
   ) {
+    incomingMessage = false;
     logger.error("This is not an incoming message", { payload: message });
   }
 
@@ -360,7 +363,9 @@ async function handleIncomingMessage(message) {
   const contactNumber = getFormattedPhoneNumber(From);
   const userNumber = To ? getFormattedPhoneNumber(To) : "";
 
-  await maybeOnboardNewContact(contactNumber, userNumber);
+  if (incomingMessage) {
+    await maybeOnboardNewContact(message);
+  }
 
   let pendingMessagePart = {
     service: "twilio",
