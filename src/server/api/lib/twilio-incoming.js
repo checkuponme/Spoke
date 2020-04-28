@@ -8,16 +8,12 @@ export async function maybeOnboardNewContact(incomingMessage, trx = r.knex) {
   const contactCell = getFormattedPhoneNumber(incomingMessage.From);
   const campaignCell = getFormattedPhoneNumber(incomingMessage.To);
   const messagingServiceSid = incomingMessage.MessagingServiceSid;
-
   const {
     JOBS_SAME_PROCESS,
     ONBOARDING_ASSIGNMENT_ID: onboardingAssignmentId,
     ONBOARDING_CAMPAIGN_ID: onboardingCampaignId,
     ONBOARDING_USER_ID: onboardingUserId
   } = config;
-  const onboardingText =
-    'Hi there! Thanks for sending a text to CheckUpOn.Me! If you would like to be texted by one of our volunteers, please reply to this message with the word "YES".';
-
   if (!onboardingCampaignId || !onboardingAssignmentId || !onboardingUserId) {
     logger.error(
       `ONBOARDING_ASSIGNMENT_ID, ONBOARDING_CAMPAIGN_ID, and ONBOARDING_USER_ID must be set in .env. Can not onboard ${contactCell}`
@@ -25,6 +21,8 @@ export async function maybeOnboardNewContact(incomingMessage, trx = r.knex) {
     return;
   }
 
+  const onboardingText =
+    'Hi there! Thanks for sending a text to CheckUpOn.Me! If you would like to be texted by one of our volunteers, please reply to this message with the word "YES".';
   const users = await trx("campaign_contact")
     .select("id")
     .where({
@@ -62,7 +60,6 @@ export async function maybeOnboardNewContact(incomingMessage, trx = r.knex) {
       service: "twilio",
       is_from_contact: false
     };
-
     const [replyMessage] = await trx("message")
       .insert(replyData)
       .returning(Object.keys(replyData).concat(["id"]));
