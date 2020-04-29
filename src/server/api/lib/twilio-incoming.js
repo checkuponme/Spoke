@@ -12,24 +12,27 @@ export async function maybeOnboardNewContact(incomingMessage, trx = r.knex) {
     JOBS_SAME_PROCESS,
     ONBOARDING_ASSIGNMENT_ID: onboardingAssignmentId,
     ONBOARDING_CAMPAIGN_ID: onboardingCampaignId,
+    ONBOARDING_TEXT: onboardingText,
     ONBOARDING_USER_ID: onboardingUserId
   } = config;
-  if (!onboardingCampaignId || !onboardingAssignmentId || !onboardingUserId) {
+  if (
+    !onboardingAssignmentId ||
+    !onboardingCampaignId ||
+    !onboardingText ||
+    !onboardingUserId
+  ) {
     logger.error(
-      `ONBOARDING_ASSIGNMENT_ID, ONBOARDING_CAMPAIGN_ID, and ONBOARDING_USER_ID must be set in .env. Can not onboard ${contactCell}`
+      `ONBOARDING_ASSIGNMENT_ID, ONBOARDING_CAMPAIGN_ID, ONBOARDING_TEXT, and ONBOARDING_USER_ID must be set in .env. Can not onboard ${contactCell}`
     );
     return;
   }
 
-  const onboardingText =
-    'Hi there! Thanks for sending a text to CheckUpOn.Me! If you would like to be texted by one of our volunteers, please reply to this message with the word "YES".';
   const users = await trx("campaign_contact")
     .select("id")
     .where({
       cell: contactCell
     })
     .limit(1);
-
   if (!users || !users.length) {
     const [
       [contactId],
