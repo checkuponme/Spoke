@@ -1,4 +1,3 @@
-import { sqlResolvers } from "./lib/utils";
 import { GraphQLError } from "graphql/error";
 import { sqlResolvers } from "./lib/utils";
 import { r } from "../models";
