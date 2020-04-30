@@ -317,6 +317,11 @@ const validators = {
       "Email from address. Required to send email from either Mailgun or a custom SMTP server.",
     default: undefined
   }),
+  EMAIL_REPLY_TO: email({
+    desc:
+      "Reply-To address. If not supplied, an organization owner's email address will be used.",
+    default: undefined
+  }),
   EMAIL_HOST: host({
     desc: "Email server host. Required for custom SMTP server usage.",
     default: undefined
@@ -566,6 +571,10 @@ const validators = {
     desc: "The name of the Slack team to use for sign-in.",
     default: undefined
   }),
+  SLACK_TEAM_ID: str({
+    desc: "The ID of the Slack team to use for sign-in.",
+    default: undefined
+  }),
   SLACK_CLIENT_ID: str({
     desc: "The Slack client ID to use for sign-in.",
     default: undefined,
@@ -574,6 +583,16 @@ const validators = {
   SLACK_CLIENT_SECRET: str({
     desc: "The Slack client secret to use for sign-in.",
     default: undefined
+  }),
+  SLACK_SCOPES: str({
+    desc: "Comma separated list Slack scopes to request.",
+    example: "groups:read",
+    default: "identity.basic,identity.email,identity.team"
+  }),
+  SLACK_CONVERT_EXISTING: bool({
+    desc:
+      "When true, Slack authentication will attempt to convert existing non-Slack accounts (with matching emails) to Slack accounts",
+    default: true
   }),
   SLACK_TOKEN: str({
     desc: "The Slack token to use for the slack-teams-update cron job",

@@ -2,6 +2,64 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.9.5](https://github.com/politics-rewired/spoke/compare/v1.9.4...v1.9.5) (2020-04-29)
+
+### [1.9.4](https://github.com/politics-rewired/spoke/compare/v1.9.3...v1.9.4) (2020-04-29)
+
+### [1.9.3](https://github.com/politics-rewired/spoke/compare/v1.9.2...v1.9.3) (2020-04-29)
+
+### [1.9.2](https://github.com/politics-rewired/spoke/compare/v1.9.1...v1.9.2) (2020-04-29)
+
+### [1.9.1](https://github.com/politics-rewired/spoke/compare/v1.9.0...v1.9.1) (2020-04-29)
+
+
+### Features
+
+* release stale replies ([#635](https://github.com/politics-rewired/spoke/issues/635)) ([595eae3](https://github.com/politics-rewired/spoke/commit/595eae33a4f6eb5530857def59451148f4f0ad2e))
+
+
+### Bug Fixes
+
+* fix campaign creation error ([#647](https://github.com/politics-rewired/spoke/issues/647)) ([4a91132](https://github.com/politics-rewired/spoke/commit/4a9113212431d502858aa2a9c844a9b36fd97713))
+
+## [1.9.0](https://github.com/politics-rewired/spoke/compare/v1.8.5...v1.9.0) (2020-04-23)
+
+
+### Features
+
+* allow selection of organization from home page ([#645](https://github.com/politics-rewired/spoke/issues/645)) ([4e78468](https://github.com/politics-rewired/spoke/commit/4e78468fc7681ab37bad74ad83fdc5229e15fc97))
+* reply-to address ([#642](https://github.com/politics-rewired/spoke/issues/642)) ([5347418](https://github.com/politics-rewired/spoke/commit/534741847de386ffd141ba5b4b6b21f17da6e25d))
+
+
+### Bug Fixes
+
+* **settings:** fix capitalization of auto-approve type ([#643](https://github.com/politics-rewired/spoke/issues/643)) ([c18d71e](https://github.com/politics-rewired/spoke/commit/c18d71e6b55339485cf73be10bb22f96a390588f))
+* remove afterCreate hook ([#638](https://github.com/politics-rewired/spoke/issues/638)) ([75c6744](https://github.com/politics-rewired/spoke/commit/75c67447bfa3466cf0a09c5398ad9f70074513ee))
+
+### [1.8.5](https://github.com/politics-rewired/spoke/compare/v1.8.4...v1.8.5) (2020-04-15)
+
+
+### Bug Fixes
+
+* fix permission check ([#631](https://github.com/politics-rewired/spoke/issues/631)) ([b549f9d](https://github.com/politics-rewired/spoke/commit/b549f9d91d18c5b9d35e32c31df72077a567dd8c))
+* remove auth query param from segments helpdesk url ([#637](https://github.com/politics-rewired/spoke/issues/637)) ([29512aa](https://github.com/politics-rewired/spoke/commit/29512aa94146c38321c050e983f82365e25963ed))
+* require owner permissions to query settings ([#632](https://github.com/politics-rewired/spoke/issues/632)) ([03c9890](https://github.com/politics-rewired/spoke/commit/03c9890cc2580fcb0e917c36bf0093947ff62dc6))
+* use the same knex client throughout query builder ([#640](https://github.com/politics-rewired/spoke/issues/640)) ([43aba59](https://github.com/politics-rewired/spoke/commit/43aba59f0b256b42009e7595942055df841d9d1a))
+
+### [1.8.4](https://github.com/politics-rewired/spoke/compare/v1.8.3...v1.8.4) (2020-04-10)
+
+
+### Bug Fixes
+
+* prevent conversation overflow ([7098c25](https://github.com/politics-rewired/spoke/commit/7098c258d200bf6b8004d252980c41449571ccf7))
+
+### [1.8.3](https://github.com/politics-rewired/spoke/compare/v1.8.2...v1.8.3) (2020-04-10)
+
+
+### Bug Fixes
+
+* fix flexbox height calculation in Safari ([#630](https://github.com/politics-rewired/spoke/issues/630)) ([83cf4a2](https://github.com/politics-rewired/spoke/commit/83cf4a2dd8cb53ebee97b2cd88c4295d0bba798b))
+
 ### [1.8.2](https://github.com/politics-rewired/spoke/compare/v1.8.1...v1.8.2) (2020-04-08)
 
 
