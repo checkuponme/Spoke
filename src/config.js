@@ -483,6 +483,23 @@ const validators = {
     default: false,
     isClient: true
   }),
+  ONBOARDING_ASSIGNMENT_ID: num({
+    desc:
+      "Assignment ID used by api/lib/twilio-incoming to onboard new contacts",
+    default: undefined
+  }),
+  ONBOARDING_CAMPAIGN_ID: num({
+    desc: "Campaign ID used by api/lib/twilio-incoming to onboard new contacts",
+    default: undefined
+  }),
+  ONBOARDING_TEXT: str({
+    desc: "User ID used by api/lib/twilio-incoming to onboard new contacts",
+    default: undefined
+  }),
+  ONBOARDING_USER_ID: num({
+    desc: "User ID used by api/lib/twilio-incoming to onboard new contacts",
+    default: undefined
+  }),
   OPT_OUT_MESSAGE: str({
     desc: "Spoke instance-wide default for opt out message.",
     default: undefined
