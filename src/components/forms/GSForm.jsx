@@ -50,6 +50,7 @@ export default class GSForm extends React.Component {
       if (!React.isValidElement(child)) {
         return child;
       } else if (areComponentsEqual(child.type, Form.Field)) {
+
         const name = child.props.name;
         let error = this.state.formErrors ? this.state.formErrors[name] : null;
         let clonedElement = child;

@@ -173,17 +173,11 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     textingHoursStart,
     textingHoursEnd,
     isAutoassignEnabled,
+    repliesStaleAfter,
     timezone
   } = campaign;
-  // some changes require ADMIN and we recheck below
-  const organizationId =
-    campaign.organizationId || origCampaignRecord.organization_id;
-  await accessRequired(
-    user,
-    organizationId,
-    "SUPERVOLUNTEER",
-    /* superadmin*/ true
-  );
+
+  const organizationId = origCampaignRecord.organization_id;
   const campaignUpdates = {
     id,
     title,
@@ -198,6 +192,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     texting_hours_start: textingHoursStart,
     texting_hours_end: textingHoursEnd,
     is_autoassign_enabled: isAutoassignEnabled,
+    replies_stale_after_minutes: repliesStaleAfter, // this is null to unset it - it must be null, not undefined
     timezone
   };
 
@@ -939,18 +934,18 @@ const rootMutations = {
         return organization;
       }
 
-      let approvalStatus = RequestAutoApproveType.APPROVAL_REQUIRED.toLowerCase();
+      let approvalStatus = RequestAutoApproveType.APPROVAL_REQUIRED;
       try {
         approvalStatus =
-          JSON.parse(organization.feature || "{}").defaulTexterApprovalStatus ||
-          approvalStatus;
+          JSON.parse(organization.features || "{}")
+            .defaulTexterApprovalStatus || approvalStatus;
       } catch (err) {}
 
       await r.knex("user_organization").insert({
         user_id: user.id,
         organization_id: organization.id,
         role: "TEXTER",
-        request_status: approvalStatus
+        request_status: approvalStatus.toLowerCase()
       });
 
       return organization;
@@ -1098,7 +1093,7 @@ const rootMutations = {
         organizationId: campaign.organizationId
       });
 
-      const [newCampaignId] = await r
+      const [origCampaignRecord] = await r
         .knex("campaign")
         .insert({
           organization_id: campaign.organizationId,
@@ -1109,9 +1104,15 @@ const rootMutations = {
           is_started: false,
           is_archived: false
         })
-        .returning("id");
+        .returning("*");
 
-      return editCampaign(newCampaignId, campaign, loaders, user);
+      return editCampaign(
+        origCampaignRecord.id,
+        campaign,
+        loaders,
+        user,
+        origCampaignRecord
+      );
     },
 
     copyCampaign: async (_, { id }, { user, loaders }) => {
@@ -1270,15 +1271,7 @@ const rootMutations = {
       // to fail – this fixes it by ensuring its a proper object
       const campaign = Object.assign({}, campaignEdits);
 
-      if (campaign.organizationId) {
-        await accessRequired(user, campaign.organizationId, "ADMIN");
-      } else {
-        await accessRequired(
-          user,
-          origCampaign.organization_id,
-          "SUPERVOLUNTEER"
-        );
-      }
+      await accessRequired(user, origCampaign.organization_id, "ADMIN");
 
       memoizer.invalidate(cacheOpts.CampaignsList.key, {
         organizationId: campaign.organizationId
@@ -1440,9 +1433,8 @@ const rootMutations = {
       const { payload = {} } = invite;
 
       const newOrganization = await r.knex.transaction(async trx => {
-        const defaultStatus = RequestAutoApproveType.APPROVAL_REQUIRED;
         const orgFeatures = {
-          defaulTexterApprovalStatus: defaultStatus.toLowerCase()
+          defaulTexterApprovalStatus: RequestAutoApproveType.APPROVAL_REQUIRED
         };
         if (payload.org_features) {
           const { switchboard_lrn_api_key } = payload.org_features;
