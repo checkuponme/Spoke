@@ -16,6 +16,7 @@ import {
   messageComponents
 } from "./message-sending";
 import { symmetricDecrypt } from "./crypto";
+import { onboardNewContact } from "./twilio-incoming";
 
 const MAX_SEND_ATTEMPTS = 5;
 const MESSAGE_VALIDITY_PADDING_SECONDS = 30;
@@ -165,7 +166,7 @@ const twilioClient = async messagingServiceSid => {
   return Twilio(accountSid, authToken);
 };
 
-async function sendMessage(message, organizationId, trx = r.knex) {
+export async function sendMessage(message, organizationId, trx = r.knex) {
   const service = await getContactMessagingService(
     message.campaign_contact_id,
     organizationId
@@ -346,12 +347,15 @@ async function handleDeliveryReport(report) {
 }
 
 async function handleIncomingMessage(message) {
+  let incomingMessage = true;
+
   if (
     !message.hasOwnProperty("From") ||
     !message.hasOwnProperty("To") ||
     !message.hasOwnProperty("Body") ||
     !message.hasOwnProperty("MessageSid")
   ) {
+    incomingMessage = false;
     logger.error("This is not an incoming message", { payload: message });
   }
 
@@ -359,6 +363,9 @@ async function handleIncomingMessage(message) {
   const contactNumber = getFormattedPhoneNumber(From);
   const userNumber = To ? getFormattedPhoneNumber(To) : "";
 
+  if (incomingMessage) {
+    await onboardNewContact(message);
+  }
   let pendingMessagePart = {
     service: "twilio",
     service_id: MessageSid,
